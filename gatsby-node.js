@@ -1,40 +1,39 @@
-const createTemporaryMockNodes = ({ emitter, actions}) => {
+const createTemporaryMockNodes = ({ store, boundActionCreators }) => {
   const node = {
-    id: 'mocked',
+    id: "mocked",
     parent: null,
     children: [],
-    myField: 'yup',
+    myField: "yup",
     internal: {
-      type: 'MockedNodeType',
-      contentDigest: 'foo'
+      type: "MockedNodeType",
+      contentDigest: "foo"
     }
-  }
+  };
 
-  actions.createNode(node)
-
-  const onSchemaUpdate = () => {
-    actions.deleteNode({ node })
-
-    // poor man's "once"
-    emitter.off(`SET_SCHEMA`, onSchemaUpdate)
-  }
+  boundActionCreators.createNode(node);
 
   // we will listen to when schema is set,
   // so we can immediately remove mocked nodes
   // as types are already produced, we don't need them anymore
-  // THIS IS HACKY - emitter is considered more of a private API
+  // THIS IS HACKY - store is considered more of a private API
   // and listening to internal SET_SCHEMA message might be begging
   // for problems
-  emitter.on(`SET_SCHEMA`, onSchemaUpdate)
-}
+  const unsubscribe = store.subscribe(() => {
+    const lastAction = store.getState().lastAction;
+    if (lastAction.type === `SET_SCHEMA`) {
+      boundActionCreators.deleteNode(node.id, node);
+      unsubscribe();
+    }
+  });
+};
 
 // that's pretty normal spot to create nodes
-exports.sourceNodes = ({ emitter, actions }) => {
-  createTemporaryMockNodes({ emitter, actions })
-}
+exports.sourceNodes = ({ store, boundActionCreators }) => {
+  createTemporaryMockNodes({ store, boundActionCreators });
+};
 
 // this is just first API hook after "createPages" hook
 // and before regenerating schema
-exports.onPreExtractQueries = ({ emitter, actions }) => {
-  createTemporaryMockNodes({ emitter, actions })
-}
+exports.onPreExtractQueries = ({ store, boundActionCreators }) => {
+  createTemporaryMockNodes({ store, boundActionCreators });
+};

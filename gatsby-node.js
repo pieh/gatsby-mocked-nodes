@@ -1,3 +1,40 @@
+/*
+
+ABSOLUTELY DO NOT USE THIS!
+
+In recent Gatsby versions this cause a lot of problems. Please make use of Schema Customization API
+https://www.gatsbyjs.org/docs/schema-customization/ to define types for schema
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const createTemporaryMockNodes = ({ emitter, actions}) => {
   const node = {
     id: 'mocked',
